@@ -5,8 +5,10 @@ import AffirmationsGuide from "./components/AffirmationsGuide";
 import BodyScanGuide from "./components/BodyScanGuide";
 import BreathingGuide from "./components/BreathingGuide";
 import ChatMessage, { TypingIndicator } from "./components/ChatMessage";
+import GratitudeGuide from "./components/GratitudeGuide";
 import GroundingGuide from "./components/GroundingGuide";
 import StretchGuide from "./components/StretchGuide";
+import VisualizationGuide from "./components/VisualizationGuide";
 import VoiceButton from "./components/VoiceButton";
 
 interface Message {
@@ -23,7 +25,7 @@ const WELCOME: Message = {
 };
 
 type BreathTechnique = "box" | "478";
-type Tool = "breath-box" | "breath-478" | "body-scan" | "grounding" | "affirmations" | "stretch" | null;
+type Tool = "breath-box" | "breath-478" | "body-scan" | "grounding" | "affirmations" | "stretch" | "visualization" | "gratitude" | null;
 
 interface SpeechRecognitionEvent extends Event {
   results: SpeechRecognitionResultList;
@@ -106,6 +108,22 @@ const TOOLS: {
     title: "Estiramientos rápidos para liberar tensión",
     colorClass: "bg-[#f7eef7] border-[#b89dc3] text-[#6a4a8a]",
     activeClass: "bg-[#edd8ed] border-[#8b5a9e] text-[#4a2a6a]",
+  },
+  {
+    id: "visualization",
+    label: "Visualización",
+    emoji: "🌄",
+    title: "Viaje de visualización guiada para calmar la mente",
+    colorClass: "bg-[#eef4f0] border-[#a8c5b5] text-[#5a8070]",
+    activeClass: "bg-[#d6ece2] border-[#7c9e8a] text-[#3d6b55]",
+  },
+  {
+    id: "gratitude",
+    label: "Gratitud",
+    emoji: "🌸",
+    title: "Diario rápido de gratitud para reconectar con lo positivo",
+    colorClass: "bg-[#fdf0e6] border-[#e8b87a] text-[#8a5a30]",
+    activeClass: "bg-[#f8dfc0] border-[#c4956a] text-[#6a4020]",
   },
 ];
 
@@ -271,11 +289,8 @@ export default function Home() {
           <span className="text-[#c4b8af] text-xs hidden sm:block">Recursos →</span>
         </div>
 
-        {/* Tools scroll bar */}
-        <div
-          className="flex gap-2 px-4 pb-3 overflow-x-auto"
-          style={{ scrollbarWidth: "none" }}
-        >
+        {/* Tools grid — 4 per row, wraps to 2 rows */}
+        <div className="grid grid-cols-4 gap-1.5 px-3 pb-3">
           {TOOLS.map((tool) => {
             const isActive = activeTool === tool.id;
             return (
@@ -283,12 +298,12 @@ export default function Home() {
                 key={tool.id}
                 onClick={() => setActiveTool(isActive ? null : tool.id)}
                 title={tool.title}
-                className={`flex-shrink-0 flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full border transition-all duration-200 font-medium ${
+                className={`flex flex-col items-center gap-0.5 text-xs px-2 py-2 rounded-xl border transition-all duration-200 font-medium ${
                   isActive ? tool.activeClass : tool.colorClass + " hover:opacity-80"
                 }`}
               >
-                <span>{tool.emoji}</span>
-                <span className="whitespace-nowrap">{tool.label}</span>
+                <span className="text-base leading-none">{tool.emoji}</span>
+                <span className="text-center leading-tight" style={{ fontSize: "10px" }}>{tool.label}</span>
               </button>
             );
           })}
@@ -370,6 +385,12 @@ export default function Home() {
       )}
       {activeTool === "stretch" && (
         <StretchGuide onClose={() => setActiveTool(null)} />
+      )}
+      {activeTool === "visualization" && (
+        <VisualizationGuide onClose={() => setActiveTool(null)} />
+      )}
+      {activeTool === "gratitude" && (
+        <GratitudeGuide onClose={() => setActiveTool(null)} />
       )}
     </div>
   );
