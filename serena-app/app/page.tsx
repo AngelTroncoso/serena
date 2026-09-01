@@ -1,8 +1,12 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import AffirmationsGuide from "./components/AffirmationsGuide";
+import BodyScanGuide from "./components/BodyScanGuide";
 import BreathingGuide from "./components/BreathingGuide";
 import ChatMessage, { TypingIndicator } from "./components/ChatMessage";
+import GroundingGuide from "./components/GroundingGuide";
+import StretchGuide from "./components/StretchGuide";
 import VoiceButton from "./components/VoiceButton";
 
 interface Message {
@@ -19,6 +23,7 @@ const WELCOME: Message = {
 };
 
 type BreathTechnique = "box" | "478";
+type Tool = "breath-box" | "breath-478" | "body-scan" | "grounding" | "affirmations" | "stretch" | null;
 
 interface SpeechRecognitionEvent extends Event {
   results: SpeechRecognitionResultList;
@@ -46,11 +51,69 @@ declare global {
   }
 }
 
+const TOOLS: {
+  id: Tool;
+  label: string;
+  emoji: string;
+  title: string;
+  colorClass: string;
+  activeClass: string;
+}[] = [
+  {
+    id: "breath-box",
+    label: "Respiración Caja",
+    emoji: "🌿",
+    title: "Respiración en caja 4-4-4-4",
+    colorClass: "bg-[#eef4f0] border-[#a8c5b5] text-[#5a8070]",
+    activeClass: "bg-[#d6ece2] border-[#7c9e8a] text-[#3d6b55]",
+  },
+  {
+    id: "breath-478",
+    label: "Respiración 4-7-8",
+    emoji: "🌙",
+    title: "Respiración 4-7-8 para calmar el sistema nervioso",
+    colorClass: "bg-[#eef0f7] border-[#8b9dc3] text-[#5a6a9e]",
+    activeClass: "bg-[#dde1f0] border-[#5a6a9e] text-[#3a4a7e]",
+  },
+  {
+    id: "body-scan",
+    label: "Escaneo Corporal",
+    emoji: "🧘",
+    title: "Recorre tu cuerpo con atención plena",
+    colorClass: "bg-[#f0ebe4] border-[#c4b8af] text-[#7a6f68]",
+    activeClass: "bg-[#e2d4c6] border-[#a89f97] text-[#5a5048]",
+  },
+  {
+    id: "grounding",
+    label: "Anclaje 5-4-3-2-1",
+    emoji: "🌍",
+    title: "Técnica de anclaje sensorial",
+    colorClass: "bg-[#fdf0e6] border-[#e8b87a] text-[#8a6030]",
+    activeClass: "bg-[#f8dfc0] border-[#c4956a] text-[#6a4020]",
+  },
+  {
+    id: "affirmations",
+    label: "Afirmaciones",
+    emoji: "💛",
+    title: "Afirmaciones de calma y autocompasión",
+    colorClass: "bg-[#fff9e6] border-[#e8cc7a] text-[#8a6a10]",
+    activeClass: "bg-[#fff0b0] border-[#c4a030] text-[#6a5000]",
+  },
+  {
+    id: "stretch",
+    label: "Estiramientos",
+    emoji: "🤸",
+    title: "Estiramientos rápidos para liberar tensión",
+    colorClass: "bg-[#f7eef7] border-[#b89dc3] text-[#6a4a8a]",
+    activeClass: "bg-[#edd8ed] border-[#8b5a9e] text-[#4a2a6a]",
+  },
+];
+
 export default function Home() {
   const [messages, setMessages] = useState<Message[]>([WELCOME]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [breathing, setBreathing] = useState<BreathTechnique | null>(null);
+  const [activeTool, setActiveTool] = useState<Tool>(null);
   const [listening, setListening] = useState(false);
   const [voiceSupported, setVoiceSupported] = useState(false);
   const [streamingText, setStreamingText] = useState("");
@@ -183,47 +246,52 @@ export default function Home() {
     setListening(true);
   }, [listening, sendMessage]);
 
+  // Derive breathing technique for BreathingGuide
+  const breathTechnique: BreathTechnique | null =
+    activeTool === "breath-box" ? "box" : activeTool === "breath-478" ? "478" : null;
+
   return (
     <div className="flex flex-col h-screen max-w-2xl mx-auto">
       {/* Header */}
-      <header className="flex items-center justify-between px-5 py-4 border-b border-[#e2d9d0] bg-white/60 backdrop-blur-sm flex-shrink-0">
-        <div className="flex items-center gap-3">
-          {/* Avatar with SVG leaf */}
-          <div className="w-10 h-10 rounded-full bg-[#eef4f0] border border-[#a8c5b5] flex items-center justify-center shadow-sm">
-            <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 2C7 2 3 7 3 12c0 3.5 2 6.5 5 8l1-3c-1.5-1-2.5-2.8-2.5-5 0-3.3 2.7-6 6-6s6 2.7 6 6c0 2.2-1 4-2.5 5l1 3c3-1.5 5-4.5 5-8 0-5-4-10-9-10z" fill="#7c9e8a"/>
-              <path d="M12 8v8M9 13l3 3 3-3" stroke="#5a8070" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
+      <header className="border-b border-[#e2d9d0] bg-white/60 backdrop-blur-sm flex-shrink-0">
+        {/* Top row: identity */}
+        <div className="flex items-center justify-between px-5 py-3">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-full bg-[#eef4f0] border border-[#a8c5b5] flex items-center justify-center shadow-sm flex-shrink-0">
+              <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2C7 2 3 7 3 12c0 3.5 2 6.5 5 8l1-3c-1.5-1-2.5-2.8-2.5-5 0-3.3 2.7-6 6-6s6 2.7 6 6c0 2.2-1 4-2.5 5l1 3c3-1.5 5-4.5 5-8 0-5-4-10-9-10z" fill="#7c9e8a"/>
+                <path d="M12 8v8M9 13l3 3 3-3" stroke="#5a8070" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
+            <div>
+              <h1 className="text-[#3d3530] text-sm font-semibold leading-none">Serena</h1>
+              <p className="text-[#a89f97] text-xs mt-0.5">Tu espacio de calma · Siempre presente</p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-[#3d3530] text-sm font-700 leading-none tracking-wide">
-              Serena
-            </h1>
-            <p className="text-[#a89f97] text-xs mt-0.5 font-400">
-              Tu espacio de calma · Siempre presente
-            </p>
-          </div>
+          <span className="text-[#c4b8af] text-xs hidden sm:block">Recursos →</span>
         </div>
 
-        {/* Breathing controls */}
-        <div className="flex items-center gap-2">
-          <span className="text-[#a89f97] text-xs hidden sm:block font-400">
-            Respirar:
-          </span>
-          <button
-            onClick={() => setBreathing("box")}
-            className="text-xs px-3 py-1.5 rounded-full bg-[#eef4f0] border border-[#a8c5b5] text-[#5a8070] hover:bg-[#d6ece2] transition-colors font-500"
-            title="Respiración en caja 4-4-4-4"
-          >
-            🌿 Caja
-          </button>
-          <button
-            onClick={() => setBreathing("478")}
-            className="text-xs px-3 py-1.5 rounded-full bg-[#eef0f7] border border-[#8b9dc3] text-[#5a6a9e] hover:bg-[#dde1f0] transition-colors font-500"
-            title="Respiración 4-7-8"
-          >
-            🌙 4-7-8
-          </button>
+        {/* Tools scroll bar */}
+        <div
+          className="flex gap-2 px-4 pb-3 overflow-x-auto"
+          style={{ scrollbarWidth: "none" }}
+        >
+          {TOOLS.map((tool) => {
+            const isActive = activeTool === tool.id;
+            return (
+              <button
+                key={tool.id}
+                onClick={() => setActiveTool(isActive ? null : tool.id)}
+                title={tool.title}
+                className={`flex-shrink-0 flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full border transition-all duration-200 font-medium ${
+                  isActive ? tool.activeClass : tool.colorClass + " hover:opacity-80"
+                }`}
+              >
+                <span>{tool.emoji}</span>
+                <span className="whitespace-nowrap">{tool.label}</span>
+              </button>
+            );
+          })}
         </div>
       </header>
 
@@ -235,11 +303,7 @@ export default function Home() {
 
         {streamingText && (
           <ChatMessage
-            message={{
-              role: "model",
-              parts: streamingText,
-              id: "streaming",
-            }}
+            message={{ role: "model", parts: streamingText, id: "streaming" }}
           />
         )}
 
@@ -277,28 +341,35 @@ export default function Home() {
             aria-label="Enviar mensaje"
             className="flex-shrink-0 w-10 h-10 rounded-full bg-[#7c9e8a] flex items-center justify-center text-white hover:bg-[#5a8070] transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed shadow-sm"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              className="w-4 h-4"
-            >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
               <path d="M3.478 2.405a.75.75 0 0 0-.926.94l2.432 7.905H13.5a.75.75 0 0 1 0 1.5H4.984l-2.432 7.905a.75.75 0 0 0 .926.94 60.519 60.519 0 0 0 18.445-8.986.75.75 0 0 0 0-1.218A60.517 60.517 0 0 0 3.478 2.405z" />
             </svg>
           </button>
         </div>
 
-        <p className="text-center text-[#c4b8af] text-xs mt-2 font-300">
+        <p className="text-center text-[#c4b8af] text-xs mt-2">
           Serena orienta, no prescribe médicamente. En crisis, contacta servicios de emergencia.
         </p>
       </footer>
 
-      {/* Breathing overlay */}
-      {breathing && (
+      {/* Tool overlays */}
+      {breathTechnique && (
         <BreathingGuide
-          technique={breathing}
-          onClose={() => setBreathing(null)}
+          technique={breathTechnique}
+          onClose={() => setActiveTool(null)}
         />
+      )}
+      {activeTool === "body-scan" && (
+        <BodyScanGuide onClose={() => setActiveTool(null)} />
+      )}
+      {activeTool === "grounding" && (
+        <GroundingGuide onClose={() => setActiveTool(null)} />
+      )}
+      {activeTool === "affirmations" && (
+        <AffirmationsGuide onClose={() => setActiveTool(null)} />
+      )}
+      {activeTool === "stretch" && (
+        <StretchGuide onClose={() => setActiveTool(null)} />
       )}
     </div>
   );
