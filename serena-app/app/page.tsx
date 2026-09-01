@@ -14,7 +14,7 @@ interface Message {
 const WELCOME: Message = {
   role: "model",
   parts:
-    "Hola, soy Serena. Estoy aquí contigo. ¿Cómo te sientes en este momento? Del 1 al 10, ¿qué nivel de tensión sientes en tu cuerpo ahora mismo?",
+    "Hola, soy Serena 🌿 Estoy aquí contigo. ¿Cómo te sientes en este momento? Del 1 al 10, ¿qué nivel de tensión sientes en tu cuerpo ahora mismo?",
   id: "welcome",
 };
 
@@ -86,7 +86,6 @@ export default function Home() {
       setLoading(true);
       setStreamingText("");
 
-      // Resize textarea back
       if (textareaRef.current) {
         textareaRef.current.style.height = "auto";
       }
@@ -133,7 +132,7 @@ export default function Home() {
           {
             role: "model",
             parts:
-              "Lo siento, algo salió mal. Por favor intenta de nuevo en un momento.",
+              "Lo siento, algo salió mal. Por favor intenta de nuevo en un momento 🌿",
             id: `error-${Date.now()}`,
           },
         ]);
@@ -151,7 +150,6 @@ export default function Home() {
 
   const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInput(e.target.value);
-    // Auto-grow
     e.target.style.height = "auto";
     e.target.style.height = `${Math.min(e.target.scrollHeight, 120)}px`;
   };
@@ -188,39 +186,43 @@ export default function Home() {
   return (
     <div className="flex flex-col h-screen max-w-2xl mx-auto">
       {/* Header */}
-      <header className="flex items-center justify-between px-4 py-3 border-b border-[#21262d] flex-shrink-0">
+      <header className="flex items-center justify-between px-5 py-4 border-b border-[#e2d9d0] bg-white/60 backdrop-blur-sm flex-shrink-0">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-[#3fb950]/15 border border-[#3fb950]/40 flex items-center justify-center">
-            <span className="text-[#3fb950] text-sm font-semibold">S</span>
+          {/* Avatar with SVG leaf */}
+          <div className="w-10 h-10 rounded-full bg-[#eef4f0] border border-[#a8c5b5] flex items-center justify-center shadow-sm">
+            <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2C7 2 3 7 3 12c0 3.5 2 6.5 5 8l1-3c-1.5-1-2.5-2.8-2.5-5 0-3.3 2.7-6 6-6s6 2.7 6 6c0 2.2-1 4-2.5 5l1 3c3-1.5 5-4.5 5-8 0-5-4-10-9-10z" fill="#7c9e8a"/>
+              <path d="M12 8v8M9 13l3 3 3-3" stroke="#5a8070" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
           </div>
           <div>
-            <h1 className="text-[#e6edf3] text-sm font-semibold leading-none">
+            <h1 className="text-[#3d3530] text-sm font-700 leading-none tracking-wide">
               Serena
             </h1>
-            <p className="text-[#8b949e] text-xs mt-0.5">
-              Asesor anti-estrés · Siempre presente
+            <p className="text-[#a89f97] text-xs mt-0.5 font-400">
+              Tu espacio de calma · Siempre presente
             </p>
           </div>
         </div>
 
         {/* Breathing controls */}
         <div className="flex items-center gap-2">
-          <span className="text-[#8b949e] text-xs hidden sm:block">
-            Respiración:
+          <span className="text-[#a89f97] text-xs hidden sm:block font-400">
+            Respirar:
           </span>
           <button
             onClick={() => setBreathing("box")}
-            className="text-xs px-3 py-1.5 rounded-lg bg-[#161b22] border border-[#30363d] text-[#8b949e] hover:border-[#3fb950]/40 hover:text-[#3fb950] transition-colors"
+            className="text-xs px-3 py-1.5 rounded-full bg-[#eef4f0] border border-[#a8c5b5] text-[#5a8070] hover:bg-[#d6ece2] transition-colors font-500"
             title="Respiración en caja 4-4-4-4"
           >
-            Caja
+            🌿 Caja
           </button>
           <button
             onClick={() => setBreathing("478")}
-            className="text-xs px-3 py-1.5 rounded-lg bg-[#161b22] border border-[#30363d] text-[#8b949e] hover:border-[#58a6ff]/40 hover:text-[#58a6ff] transition-colors"
+            className="text-xs px-3 py-1.5 rounded-full bg-[#eef0f7] border border-[#8b9dc3] text-[#5a6a9e] hover:bg-[#dde1f0] transition-colors font-500"
             title="Respiración 4-7-8"
           >
-            4-7-8
+            🌙 4-7-8
           </button>
         </div>
       </header>
@@ -231,7 +233,6 @@ export default function Home() {
           <ChatMessage key={msg.id} message={msg} />
         ))}
 
-        {/* Streaming message */}
         {streamingText && (
           <ChatMessage
             message={{
@@ -242,14 +243,13 @@ export default function Home() {
           />
         )}
 
-        {/* Typing indicator */}
         {loading && !streamingText && <TypingIndicator />}
 
         <div ref={bottomRef} />
       </main>
 
       {/* Input area */}
-      <footer className="border-t border-[#21262d] px-4 py-3 flex-shrink-0">
+      <footer className="border-t border-[#e2d9d0] bg-white/60 backdrop-blur-sm px-4 py-3 flex-shrink-0">
         <div className="flex items-end gap-2">
           <VoiceButton
             listening={listening}
@@ -263,10 +263,10 @@ export default function Home() {
               value={input}
               onChange={handleTextareaChange}
               onKeyDown={handleKeyDown}
-              placeholder="Escríbeme cómo te sientes..."
+              placeholder="Escríbeme cómo te sientes…"
               rows={1}
               disabled={loading}
-              className="w-full resize-none bg-[#161b22] border border-[#30363d] rounded-2xl px-4 py-3 text-sm text-[#e6edf3] placeholder-[#484f58] focus:outline-none focus:border-[#3fb950]/50 transition-colors disabled:opacity-50 leading-relaxed"
+              className="w-full resize-none bg-[#faf7f4] border border-[#e2d9d0] rounded-2xl px-4 py-3 text-sm text-[#3d3530] placeholder-[#c4b8af] focus:outline-none focus:border-[#a8c5b5] focus:bg-white transition-all disabled:opacity-50 leading-relaxed shadow-sm"
               style={{ minHeight: "44px", maxHeight: "120px" }}
             />
           </div>
@@ -275,7 +275,7 @@ export default function Home() {
             onClick={() => sendMessage(input)}
             disabled={!input.trim() || loading}
             aria-label="Enviar mensaje"
-            className="flex-shrink-0 w-10 h-10 rounded-full bg-[#3fb950]/15 border border-[#3fb950]/30 flex items-center justify-center text-[#3fb950] hover:bg-[#3fb950]/25 hover:border-[#3fb950]/60 transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed"
+            className="flex-shrink-0 w-10 h-10 rounded-full bg-[#7c9e8a] flex items-center justify-center text-white hover:bg-[#5a8070] transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed shadow-sm"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -288,9 +288,8 @@ export default function Home() {
           </button>
         </div>
 
-        <p className="text-center text-[#484f58] text-xs mt-2">
-          Serena orienta, no prescribe médicamente. En crisis, contacta servicios
-          de emergencia.
+        <p className="text-center text-[#c4b8af] text-xs mt-2 font-300">
+          Serena orienta, no prescribe médicamente. En crisis, contacta servicios de emergencia.
         </p>
       </footer>
 

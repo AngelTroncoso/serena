@@ -14,14 +14,14 @@ export default function VoiceButton({ listening, supported, onClick }: Props) {
       onClick={onClick}
       aria-label={listening ? "Detener grabación de voz" : "Hablar con Serena"}
       title={listening ? "Detener voz" : "Hablar"}
-      className={`relative flex items-center justify-center w-10 h-10 rounded-full transition-all duration-200 flex-shrink-0 ${
+      className={`relative flex items-center justify-center w-10 h-10 rounded-full transition-all duration-200 flex-shrink-0 shadow-sm ${
         listening
-          ? "bg-red-500/20 border border-red-500/50 text-red-400"
-          : "bg-[#21262d] border border-[#30363d] text-[#8b949e] hover:border-[#3fb950]/40 hover:text-[#3fb950]"
+          ? "bg-[#fde8e8] border border-[#f0a0a0] text-[#c05050]"
+          : "bg-[#faf7f4] border border-[#e2d9d0] text-[#a89f97] hover:border-[#a8c5b5] hover:text-[#7c9e8a] hover:bg-[#eef4f0]"
       }`}
     >
       {listening && (
-        <span className="voice-ring absolute inset-0 rounded-full border border-red-500/50" />
+        <span className="voice-ring absolute inset-0 rounded-full border border-[#f0a0a0]" />
       )}
       <svg
         xmlns="http://www.w3.org/2000/svg"
